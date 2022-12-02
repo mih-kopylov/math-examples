@@ -12,7 +12,7 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	params := exampleParams{
-		examplesCount:           5,
+		examplesCount:           9,
 		minBoundary:             1,
 		maxBoundary:             9,
 		operandsCount:           2,
@@ -21,8 +21,9 @@ func main() {
 	}
 
 	correctAnswersCount := 0
+	previousAnswers := map[int]int{}
 	for i := 0; i < params.examplesCount; i++ {
-		example := generateExample(params)
+		example := generateExample(params, previousAnswers)
 		fmt.Println(fmt.Sprintf("%v =", example.exerciseString()))
 
 		var answer int
@@ -31,11 +32,13 @@ func main() {
 			panic(err)
 		}
 
-		if answer == example.answer() {
+		correctAnswer := example.answer()
+		previousAnswers[correctAnswer] = previousAnswers[correctAnswer] + 1
+		if answer == correctAnswer {
 			correctAnswersCount++
 			fmt.Println("Правильно!")
 		} else {
-			fmt.Println(fmt.Sprintf("Неправильно. Правильный ответ %v", example.answer()))
+			fmt.Println(fmt.Sprintf("Неправильно. Правильный ответ %v", correctAnswer))
 		}
 	}
 
@@ -46,21 +49,22 @@ func main() {
 var (
 	errUnableToGenerateOperation = errors.New("unable to generate operation")
 	errUnableToGenerateExample   = errors.New("unable to generate example")
+	errTooFrequentExampleAnswer  = errors.New("too frequent example answer")
 )
 
-func generateExample(params exampleParams) example {
+func generateExample(params exampleParams, previousAnswers map[int]int) example {
 	for i := 0; ; i++ {
-		result, err := tryGenerateExample(params)
+		result, err := tryGenerateExample(params, previousAnswers)
 		if err == nil {
 			return result
 		}
-		if i > 100 {
+		if i > 1000 {
 			panic(errUnableToGenerateExample)
 		}
 	}
 }
 
-func tryGenerateExample(params exampleParams) (example, error) {
+func tryGenerateExample(params exampleParams, previousAnswers map[int]int) (example, error) {
 	result := example{}
 	result.initialValue = generateOperand(params.availableOperands)
 	for i := 0; i < params.operandsCount-1; i++ {
@@ -70,7 +74,28 @@ func tryGenerateExample(params exampleParams) (example, error) {
 		}
 		result.operations = append(result.operations, op)
 	}
+	if tooFrequentAnswer(result.answer(), previousAnswers) {
+		return example{}, errTooFrequentExampleAnswer
+	}
 	return result, nil
+}
+
+func tooFrequentAnswer(answer int, previousAnswers map[int]int) bool {
+	if len(previousAnswers) == 0 {
+		return false
+	}
+
+	thisAnswerCount, found := previousAnswers[answer]
+	thisAnswerCount++
+	if found && len(previousAnswers) == 1 && thisAnswerCount > 1 {
+		return true
+	}
+	for _, count := range previousAnswers {
+		if thisAnswerCount-count > 1 {
+			return true
+		}
+	}
+	return false
 }
 
 func generateOperationWithinBounds(result example, params exampleParams) (operation, error) {
