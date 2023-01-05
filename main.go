@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"golang.org/x/exp/slices"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -44,14 +46,14 @@ func main() {
 }
 
 func readAnswer() int {
-	answerString := ""
 	for {
-		_, err := fmt.Scanln(&answerString)
-		if err != nil && err.Error() != "unexpected newline" {
+		reader := bufio.NewReader(os.Stdin)
+		answerString, err := reader.ReadString('\n')
+		if err != nil {
 			panic(err)
 		}
 
-		answerInt, err := strconv.Atoi(answerString)
+		answerInt, err := strconv.Atoi(strings.TrimSpace(answerString))
 		if err == nil {
 			return answerInt
 		}
