@@ -27,7 +27,7 @@ func main() {
 	previousAnswers := map[int]int{}
 	for i := 0; i < params.ExamplesCount; i++ {
 		example := generateExample(params, previousAnswers)
-		fmt.Println(fmt.Sprintf("%v =", example.exerciseString()))
+		fmt.Printf("%v =\n", example.exerciseString())
 
 		answer := readAnswer()
 		correctAnswer := example.answer()
@@ -37,12 +37,12 @@ func main() {
 			correctAnswersCount++
 			fmt.Println("Правильно!")
 		} else {
-			fmt.Println(fmt.Sprintf("Неправильно. Правильный ответ %v", correctAnswer))
+			fmt.Printf("Неправильно. Правильный ответ %v\n", correctAnswer)
 		}
 	}
 
 	fmt.Println("================")
-	fmt.Println(fmt.Sprintf("Правильных ответов: %v из %v", correctAnswersCount, params.ExamplesCount))
+	fmt.Printf("Правильных ответов: %v из %v\n", correctAnswersCount, params.ExamplesCount)
 }
 
 func readParams() (*exampleParams, error) {
