@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"golang.org/x/exp/slices"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -12,12 +13,12 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	params := exampleParams{
-		examplesCount:           9,
-		minBoundary:             1,
+		examplesCount:           10,
+		minBoundary:             0,
 		maxBoundary:             9,
 		operandsCount:           2,
 		availableOperationTypes: []operationType{plusOperationType, minusOperationType},
-		availableOperands:       []int{1, 2, 3, 4, 5},
+		availableOperands:       []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
 	}
 
 	correctAnswersCount := 0
@@ -26,13 +27,9 @@ func main() {
 		example := generateExample(params, previousAnswers)
 		fmt.Println(fmt.Sprintf("%v =", example.exerciseString()))
 
-		var answer int
-		_, err := fmt.Scanln(&answer)
-		if err != nil {
-			panic(err)
-		}
-
+		answer := readAnswer()
 		correctAnswer := example.answer()
+
 		previousAnswers[correctAnswer] = previousAnswers[correctAnswer] + 1
 		if answer == correctAnswer {
 			correctAnswersCount++
@@ -44,6 +41,22 @@ func main() {
 
 	fmt.Println("================")
 	fmt.Println(fmt.Sprintf("Правильных ответов: %v из %v", correctAnswersCount, params.examplesCount))
+}
+
+func readAnswer() int {
+	answerString := ""
+	for {
+		_, err := fmt.Scanln(&answerString)
+		if err != nil && err.Error() != "unexpected newline" {
+			panic(err)
+		}
+
+		answerInt, err := strconv.Atoi(answerString)
+		if err == nil {
+			return answerInt
+		}
+		fmt.Println("Невозможно прочитать ответ, ответ должен быть числом")
+	}
 }
 
 var (
