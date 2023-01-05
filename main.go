@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 	"math/rand"
 	"os"
 	"strconv"
@@ -12,20 +13,19 @@ import (
 	"time"
 )
 
+const configFileName = "math-examples.yaml"
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	params := exampleParams{
-		examplesCount:           10,
-		minBoundary:             0,
-		maxBoundary:             9,
-		operandsCount:           2,
-		availableOperationTypes: []operationType{plusOperationType, minusOperationType},
-		availableOperands:       []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+
+	params, err := readParams()
+	if err != nil {
+		panic(err)
 	}
 
 	correctAnswersCount := 0
 	previousAnswers := map[int]int{}
-	for i := 0; i < params.examplesCount; i++ {
+	for i := 0; i < params.ExamplesCount; i++ {
 		example := generateExample(params, previousAnswers)
 		fmt.Println(fmt.Sprintf("%v =", example.exerciseString()))
 
@@ -42,7 +42,45 @@ func main() {
 	}
 
 	fmt.Println("================")
-	fmt.Println(fmt.Sprintf("Правильных ответов: %v из %v", correctAnswersCount, params.examplesCount))
+	fmt.Println(fmt.Sprintf("Правильных ответов: %v из %v", correctAnswersCount, params.ExamplesCount))
+}
+
+func readParams() (*exampleParams, error) {
+	_, err := os.Stat(configFileName)
+	if errors.Is(err, os.ErrNotExist) {
+		defaultParams := exampleParams{
+			ExamplesCount:           10,
+			MinBoundary:             0,
+			MaxBoundary:             9,
+			OperandsCount:           2,
+			AvailableOperationTypes: []operationType{plusOperationType, minusOperationType},
+			AvailableOperands:       []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		}
+
+		bytes, err := yaml.Marshal(defaultParams)
+		if err != nil {
+			return nil, err
+		}
+
+		err = os.WriteFile(configFileName, bytes, os.ModePerm)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	bytes, err := os.ReadFile(configFileName)
+	if err != nil {
+		return nil, err
+	}
+
+	var result exampleParams
+
+	err = yaml.Unmarshal(bytes, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func readAnswer() int {
@@ -67,7 +105,7 @@ var (
 	errTooFrequentExampleAnswer  = errors.New("too frequent example answer")
 )
 
-func generateExample(params exampleParams, previousAnswers map[int]int) example {
+func generateExample(params *exampleParams, previousAnswers map[int]int) example {
 	for i := 0; ; i++ {
 		result, err := tryGenerateExample(params, previousAnswers)
 		if err == nil {
@@ -79,10 +117,10 @@ func generateExample(params exampleParams, previousAnswers map[int]int) example 
 	}
 }
 
-func tryGenerateExample(params exampleParams, previousAnswers map[int]int) (example, error) {
+func tryGenerateExample(params *exampleParams, previousAnswers map[int]int) (example, error) {
 	result := example{}
-	result.initialValue = generateOperand(params.availableOperands)
-	for i := 0; i < params.operandsCount-1; i++ {
+	result.initialValue = generateOperand(params.AvailableOperands)
+	for i := 0; i < params.OperandsCount-1; i++ {
 		op, err := generateOperationWithinBounds(result, params)
 		if err != nil {
 			return example{}, err
@@ -113,7 +151,7 @@ func tooFrequentAnswer(answer int, previousAnswers map[int]int) bool {
 	return false
 }
 
-func generateOperationWithinBounds(result example, params exampleParams) (operation, error) {
+func generateOperationWithinBounds(result example, params *exampleParams) (operation, error) {
 	for i := 0; ; i++ {
 		op := generateOperation(params)
 		temporaryOperations := slices.Clone(result.operations)
@@ -128,16 +166,16 @@ func generateOperationWithinBounds(result example, params exampleParams) (operat
 	}
 }
 
-func withinBounds(answer int, params exampleParams) bool {
-	return answer >= params.minBoundary && answer <= params.maxBoundary
+func withinBounds(answer int, params *exampleParams) bool {
+	return answer >= params.MinBoundary && answer <= params.MaxBoundary
 }
 
-func generateOperation(params exampleParams) operation {
-	operationTypeIndex := rand.Intn(len(params.availableOperationTypes))
-	opType := params.availableOperationTypes[operationTypeIndex]
+func generateOperation(params *exampleParams) operation {
+	operationTypeIndex := rand.Intn(len(params.AvailableOperationTypes))
+	opType := params.AvailableOperationTypes[operationTypeIndex]
 
-	operandIndex := rand.Intn(len(params.availableOperands))
-	operand := params.availableOperands[operandIndex]
+	operandIndex := rand.Intn(len(params.AvailableOperands))
+	operand := params.AvailableOperands[operandIndex]
 
 	switch opType {
 	case plusOperationType:
@@ -155,12 +193,12 @@ func generateOperand(operands []int) int {
 }
 
 type exampleParams struct {
-	examplesCount           int
-	minBoundary             int
-	maxBoundary             int
-	operandsCount           int
-	availableOperands       []int
-	availableOperationTypes []operationType
+	ExamplesCount           int             `yaml:"examplesCount"`
+	MinBoundary             int             `yaml:"minBoundary"`
+	MaxBoundary             int             `yaml:"maxBoundary"`
+	OperandsCount           int             `yaml:"operandsCount"`
+	AvailableOperands       []int           `yaml:"availableOperands"`
+	AvailableOperationTypes []operationType `yaml:"availableOperationTypes"`
 }
 
 type operationType string
