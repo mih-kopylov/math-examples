@@ -26,11 +26,20 @@ func main() {
 	correctAnswersCount := 0
 	previousAnswers := map[int]int{}
 	for i := 0; i < params.ExamplesCount; i++ {
-		example := generateExample(params, previousAnswers)
-		fmt.Printf("%v =\n", example.exerciseString())
+		ex, err := generateExample(params, previousAnswers)
+		if err != nil {
+			if errors.Is(err, errUnableToGenerateExample) {
+				fmt.Println("Не удалось придумать пример с заданной конфигурацией. Проверьте конфигурацию.")
+				waitForEnter()
+				os.Exit(1)
+			}
+			panic(err)
+		}
+
+		fmt.Printf("%v =\n", ex.exerciseString())
 
 		answer := readAnswer()
-		correctAnswer := example.answer()
+		correctAnswer := ex.answer()
 
 		previousAnswers[correctAnswer] = previousAnswers[correctAnswer] + 1
 		if answer == correctAnswer {
@@ -43,6 +52,12 @@ func main() {
 
 	fmt.Println("================")
 	fmt.Printf("Правильных ответов: %v из %v\n", correctAnswersCount, params.ExamplesCount)
+	waitForEnter()
+}
+
+func waitForEnter() {
+	fmt.Println("Нажмите Enter")
+	_, _ = bufio.NewReader(os.Stdin).ReadString('\n')
 }
 
 func readParams() (*exampleParams, error) {
@@ -105,32 +120,32 @@ var (
 	errTooFrequentExampleAnswer  = errors.New("too frequent example answer")
 )
 
-func generateExample(params *exampleParams, previousAnswers map[int]int) example {
+func generateExample(params *exampleParams, previousAnswers map[int]int) (*example, error) {
 	for i := 0; ; i++ {
 		result, err := tryGenerateExample(params, previousAnswers)
 		if err == nil {
-			return result
+			return result, nil
 		}
 		if i > 1000 {
-			panic(errUnableToGenerateExample)
+			return nil, errUnableToGenerateExample
 		}
 	}
 }
 
-func tryGenerateExample(params *exampleParams, previousAnswers map[int]int) (example, error) {
+func tryGenerateExample(params *exampleParams, previousAnswers map[int]int) (*example, error) {
 	result := example{}
 	result.initialValue = generateOperand(params.AvailableOperands)
 	for i := 0; i < params.OperandsCount-1; i++ {
 		op, err := generateOperationWithinBounds(result, params)
 		if err != nil {
-			return example{}, err
+			return nil, err
 		}
 		result.operations = append(result.operations, op)
 	}
 	if tooFrequentAnswer(result.answer(), previousAnswers) {
-		return example{}, errTooFrequentExampleAnswer
+		return nil, errTooFrequentExampleAnswer
 	}
-	return result, nil
+	return &result, nil
 }
 
 func tooFrequentAnswer(answer int, previousAnswers map[int]int) bool {
