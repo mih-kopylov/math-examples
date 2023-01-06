@@ -2,11 +2,27 @@
 
 A small utility to generate arithmetic examples for pupils
 
+# Installation
+
+```shell
+go install github.com/mih-kopylov/math-examples@latest
+```
+
+Or download the [latest binary](https://github.com/mih-kopylov/math-examples/releases/latest).
+
 # Usage
+
+```shell
+math-examples
+```
+
+Or if running from sources,
 
 ```shell
 go run .
 ```
+
+# Configuration
 
 Once it's run first time, it generates a `math-examples.yaml` file in current directory with generator configuration. Example:
 
