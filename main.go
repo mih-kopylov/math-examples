@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
 	"math/rand"
 	"os"
 	"strconv"
@@ -16,7 +15,6 @@ import (
 const configFileName = "math-examples.yaml"
 
 func main() {
-	startedAt := time.Now()
 	rand.Seed(time.Now().UnixNano())
 
 	params, err := readParams()
@@ -26,10 +24,9 @@ func main() {
 		panic(err)
 	}
 
-	correctAnswersCount := 0
-	answersStats := map[int]int{}
+	st := newStat()
 	for i := 0; i < params.ExamplesCount; i++ {
-		ex, err := generateExample(params, answersStats)
+		ex, err := generateExample(params, st)
 		if err != nil {
 			if errors.Is(err, errUnableToGenerateExample) {
 				fmt.Println("Не удалось придумать пример с заданной конфигурацией. Проверьте конфигурацию.")
@@ -39,23 +36,24 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Printf("%v = ", ex.exerciseString())
+		userAnswer := readAnswer(ex)
+		ans := st.add(ex, userAnswer)
 
-		answer := readAnswer()
-		correctAnswer := ex.answer()
-
-		answersStats[correctAnswer] = answersStats[correctAnswer] + 1
-		if answer == correctAnswer {
-			correctAnswersCount++
-			fmt.Println("Правильно!")
-		} else {
-			fmt.Printf("Неправильно. Правильный ответ %v\n", correctAnswer)
+		if params.ShowCorrectAnswerAfter == afterEach {
+			ans.printCorrectAnswer()
 		}
 	}
 
 	fmt.Println("================")
-	fmt.Printf("Правильных ответов: %v из %v\n", correctAnswersCount, params.ExamplesCount)
-	fmt.Printf("Затраченное время: %v\n", time.Time{}.Add(time.Since(startedAt)).Format("04:05"))
+	if params.ShowCorrectAnswerAfter == afterAll {
+		for _, a := range st.answers {
+			a.ex.printExercise()
+			a.printAnswer()
+			a.printCorrectAnswer()
+		}
+	}
+	fmt.Printf("Правильных ответов: %v из %v\n", st.getCorrectAnswersCount(), params.ExamplesCount)
+	fmt.Printf("Затраченное время: %v\n", st.getTotalTime().Format("04:05"))
 	waitForEnter()
 }
 
@@ -64,46 +62,10 @@ func waitForEnter() {
 	_, _ = bufio.NewReader(os.Stdin).ReadString('\n')
 }
 
-func readParams() (*exampleParams, error) {
-	_, err := os.Stat(configFileName)
-	if errors.Is(err, os.ErrNotExist) {
-		defaultParams := exampleParams{
-			ExamplesCount:           10,
-			MinBoundary:             0,
-			MaxBoundary:             9,
-			OperandsCount:           2,
-			AvailableOperationTypes: []operationType{plusOperationType, minusOperationType},
-			AvailableOperands:       []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
-		}
-
-		bytes, err := yaml.Marshal(defaultParams)
-		if err != nil {
-			return nil, err
-		}
-
-		err = os.WriteFile(configFileName, bytes, os.ModePerm)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	bytes, err := os.ReadFile(configFileName)
-	if err != nil {
-		return nil, err
-	}
-
-	var result exampleParams
-
-	err = yaml.Unmarshal(bytes, &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
-}
-
-func readAnswer() int {
+func readAnswer(ex *example) int {
 	for {
+		ex.printExercise()
+
 		reader := bufio.NewReader(os.Stdin)
 		answerString, err := reader.ReadString('\n')
 		if err != nil {
@@ -124,9 +86,9 @@ var (
 	errTooFrequentExampleAnswer  = errors.New("too frequent example answer")
 )
 
-func generateExample(params *exampleParams, previousAnswersStats map[int]int) (*example, error) {
+func generateExample(params *exampleParams, st *stat) (*example, error) {
 	for i := 0; ; i++ {
-		result, err := tryGenerateExample(params, previousAnswersStats)
+		result, err := tryGenerateExample(params, st)
 		if err == nil {
 			return result, nil
 		}
@@ -136,7 +98,7 @@ func generateExample(params *exampleParams, previousAnswersStats map[int]int) (*
 	}
 }
 
-func tryGenerateExample(params *exampleParams, previousAnswersStats map[int]int) (*example, error) {
+func tryGenerateExample(params *exampleParams, st *stat) (*example, error) {
 	result := example{}
 	result.initialValue = generateOperand(params.AvailableOperands)
 	for i := 0; i < params.OperandsCount-1; i++ {
@@ -146,28 +108,10 @@ func tryGenerateExample(params *exampleParams, previousAnswersStats map[int]int)
 		}
 		result.operations = append(result.operations, op)
 	}
-	if tooFrequentAnswer(result.answer(), previousAnswersStats) {
+	if st.tooFrequentAnswer(result.answer()) {
 		return nil, errTooFrequentExampleAnswer
 	}
 	return &result, nil
-}
-
-func tooFrequentAnswer(answer int, previousAnswersStats map[int]int) bool {
-	if len(previousAnswersStats) == 0 {
-		return false
-	}
-
-	thisAnswerCount, found := previousAnswersStats[answer]
-	thisAnswerCount++
-	if found && len(previousAnswersStats) == 1 && thisAnswerCount > 1 {
-		return true
-	}
-	for _, count := range previousAnswersStats {
-		if thisAnswerCount-count > 1 {
-			return true
-		}
-	}
-	return false
 }
 
 func generateOperationWithinBounds(result example, params *exampleParams) (operation, error) {
@@ -209,80 +153,4 @@ func generateOperation(params *exampleParams) operation {
 func generateOperand(operands []int) int {
 	index := rand.Intn(len(operands))
 	return operands[index]
-}
-
-type exampleParams struct {
-	ExamplesCount           int             `yaml:"examplesCount"`
-	MinBoundary             int             `yaml:"minBoundary"`
-	MaxBoundary             int             `yaml:"maxBoundary"`
-	OperandsCount           int             `yaml:"operandsCount"`
-	AvailableOperands       []int           `yaml:"availableOperands"`
-	AvailableOperationTypes []operationType `yaml:"availableOperationTypes"`
-}
-
-type operationType string
-
-const (
-	plusOperationType  operationType = "plus"
-	minusOperationType operationType = "minus"
-)
-
-type operation interface {
-	apply(initialValue int) int
-	operationString() string
-	operand() int
-}
-
-type plusOperation struct {
-	valueToAdd int
-}
-
-func (p *plusOperation) apply(initialValue int) int {
-	return initialValue + p.valueToAdd
-}
-
-func (p *plusOperation) operationString() string {
-	return "+"
-}
-
-func (p *plusOperation) operand() int {
-	return p.valueToAdd
-}
-
-type minusOperation struct {
-	valueToSubtract int
-}
-
-func (p *minusOperation) apply(initialValue int) int {
-	return initialValue - p.valueToSubtract
-}
-
-func (p *minusOperation) operationString() string {
-	return "-"
-}
-
-func (p *minusOperation) operand() int {
-	return p.valueToSubtract
-}
-
-type example struct {
-	initialValue int
-	operations   []operation
-}
-
-func (e *example) exerciseString() string {
-	builder := strings.Builder{}
-	builder.WriteString(fmt.Sprintf("%v", e.initialValue))
-	for _, o := range e.operations {
-		builder.WriteString(fmt.Sprintf(" %v %v", o.operationString(), o.operand()))
-	}
-	return builder.String()
-}
-
-func (e *example) answer() int {
-	result := e.initialValue
-	for _, o := range e.operations {
-		result = o.apply(result)
-	}
-	return result
 }

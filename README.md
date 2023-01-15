@@ -27,11 +27,12 @@ go run .
 Once it's run first time, it generates a `math-examples.yaml` file in current directory with generator configuration. Example:
 
 ```yaml
-examplesCount: 10        # Number of exercises to generate
-minBoundary: 0           # Minimal value that is calculated on each iteration
-maxBoundary: 9           # Maximum value that is calculated on each iteration 
-operandsCount: 2         # Number of operands in each exercise
-availableOperands:       # Available operands values used in generation
+examplesCount: 10            # Number of exercises to generate
+minBoundary: 0               # Minimal value that is calculated on each iteration
+maxBoundary: 9               # Maximum value that is calculated on each iteration 
+operandsCount: 2             # Number of operands in each exercise
+showCorrectAnswerAfter: each # Use 'each' to show a correct answer after each exercise or 'all' to show summary after all exercises
+availableOperands:           # Available operands values used in generation
   - 1
   - 2
   - 3
@@ -41,7 +42,7 @@ availableOperands:       # Available operands values used in generation
   - 7
   - 8
   - 9
-availableOperationTypes: # Available operations used in exercises
+availableOperationTypes:     # Available operations used in exercises
   - plus
   - minus
 ```
