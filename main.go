@@ -16,10 +16,13 @@ import (
 const configFileName = "math-examples.yaml"
 
 func main() {
+	startedAt := time.Now()
 	rand.Seed(time.Now().UnixNano())
 
 	params, err := readParams()
 	if err != nil {
+		fmt.Println("Не удалось прочитать конфигурацию, похоже, она повреждена.")
+		waitForEnter()
 		panic(err)
 	}
 
@@ -52,6 +55,7 @@ func main() {
 
 	fmt.Println("================")
 	fmt.Printf("Правильных ответов: %v из %v\n", correctAnswersCount, params.ExamplesCount)
+	fmt.Printf("Затраченное время: %v\n", time.Time{}.Add(time.Since(startedAt)).Format("04:05"))
 	waitForEnter()
 }
 
