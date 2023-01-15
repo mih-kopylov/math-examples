@@ -27,9 +27,9 @@ func main() {
 	}
 
 	correctAnswersCount := 0
-	previousAnswers := map[int]int{}
+	answersStats := map[int]int{}
 	for i := 0; i < params.ExamplesCount; i++ {
-		ex, err := generateExample(params, previousAnswers)
+		ex, err := generateExample(params, answersStats)
 		if err != nil {
 			if errors.Is(err, errUnableToGenerateExample) {
 				fmt.Println("Не удалось придумать пример с заданной конфигурацией. Проверьте конфигурацию.")
@@ -39,12 +39,12 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Printf("%v =\n", ex.exerciseString())
+		fmt.Printf("%v = ", ex.exerciseString())
 
 		answer := readAnswer()
 		correctAnswer := ex.answer()
 
-		previousAnswers[correctAnswer] = previousAnswers[correctAnswer] + 1
+		answersStats[correctAnswer] = answersStats[correctAnswer] + 1
 		if answer == correctAnswer {
 			correctAnswersCount++
 			fmt.Println("Правильно!")
@@ -124,9 +124,9 @@ var (
 	errTooFrequentExampleAnswer  = errors.New("too frequent example answer")
 )
 
-func generateExample(params *exampleParams, previousAnswers map[int]int) (*example, error) {
+func generateExample(params *exampleParams, previousAnswersStats map[int]int) (*example, error) {
 	for i := 0; ; i++ {
-		result, err := tryGenerateExample(params, previousAnswers)
+		result, err := tryGenerateExample(params, previousAnswersStats)
 		if err == nil {
 			return result, nil
 		}
@@ -136,7 +136,7 @@ func generateExample(params *exampleParams, previousAnswers map[int]int) (*examp
 	}
 }
 
-func tryGenerateExample(params *exampleParams, previousAnswers map[int]int) (*example, error) {
+func tryGenerateExample(params *exampleParams, previousAnswersStats map[int]int) (*example, error) {
 	result := example{}
 	result.initialValue = generateOperand(params.AvailableOperands)
 	for i := 0; i < params.OperandsCount-1; i++ {
@@ -146,23 +146,23 @@ func tryGenerateExample(params *exampleParams, previousAnswers map[int]int) (*ex
 		}
 		result.operations = append(result.operations, op)
 	}
-	if tooFrequentAnswer(result.answer(), previousAnswers) {
+	if tooFrequentAnswer(result.answer(), previousAnswersStats) {
 		return nil, errTooFrequentExampleAnswer
 	}
 	return &result, nil
 }
 
-func tooFrequentAnswer(answer int, previousAnswers map[int]int) bool {
-	if len(previousAnswers) == 0 {
+func tooFrequentAnswer(answer int, previousAnswersStats map[int]int) bool {
+	if len(previousAnswersStats) == 0 {
 		return false
 	}
 
-	thisAnswerCount, found := previousAnswers[answer]
+	thisAnswerCount, found := previousAnswersStats[answer]
 	thisAnswerCount++
-	if found && len(previousAnswers) == 1 && thisAnswerCount > 1 {
+	if found && len(previousAnswersStats) == 1 && thisAnswerCount > 1 {
 		return true
 	}
-	for _, count := range previousAnswers {
+	for _, count := range previousAnswersStats {
 		if thisAnswerCount-count > 1 {
 			return true
 		}
