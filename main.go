@@ -14,8 +14,11 @@ import (
 
 const configFileName = "math-examples.yaml"
 
+var (
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+)
+
 func main() {
-	rand.Seed(time.Now().UnixNano())
 
 	params, err := readParams()
 	if err != nil {
@@ -134,10 +137,10 @@ func withinBounds(answer int, params *exampleParams) bool {
 }
 
 func generateOperation(params *exampleParams) operation {
-	operationTypeIndex := rand.Intn(len(params.AvailableOperationTypes))
+	operationTypeIndex := r.Intn(len(params.AvailableOperationTypes))
 	opType := params.AvailableOperationTypes[operationTypeIndex]
 
-	operandIndex := rand.Intn(len(params.AvailableOperands))
+	operandIndex := r.Intn(len(params.AvailableOperands))
 	operand := params.AvailableOperands[operandIndex]
 
 	switch opType {
@@ -151,6 +154,6 @@ func generateOperation(params *exampleParams) operation {
 }
 
 func generateOperand(operands []int) int {
-	index := rand.Intn(len(operands))
+	index := r.Intn(len(operands))
 	return operands[index]
 }
