@@ -28,8 +28,9 @@ func main() {
 	}
 
 	st := newStat()
+	fmt.Printf("Начали решать %v\n", time.Now().Format(time.DateTime))
 	for i := 0; i < params.ExamplesCount; i++ {
-		ex, err := generateExample(params, st)
+		ex, err := generateExample(params, st, i+1)
 		if err != nil {
 			if errors.Is(err, errUnableToGenerateExample) {
 				fmt.Println("Не удалось придумать пример с заданной конфигурацией. Проверьте конфигурацию.")
@@ -89,10 +90,11 @@ var (
 	errTooFrequentExampleAnswer  = errors.New("too frequent example answer")
 )
 
-func generateExample(params *exampleParams, st *stat) (*example, error) {
+func generateExample(params *exampleParams, st *stat, number int) (*example, error) {
 	for i := 0; ; i++ {
 		result, err := tryGenerateExample(params, st)
 		if err == nil {
+			result.number = number
 			return result, nil
 		}
 		if i > 1000 {
@@ -122,7 +124,10 @@ func generateOperationWithinBounds(result example, params *exampleParams) (opera
 		op := generateOperation(params)
 		temporaryOperations := slices.Clone(result.operations)
 		temporaryOperations = append(temporaryOperations, op)
-		temporaryResult := example{result.initialValue, temporaryOperations}
+		temporaryResult := example{
+			initialValue: result.initialValue,
+			operations:   temporaryOperations,
+		}
 		if withinBounds(temporaryResult.answer(), params) {
 			return op, nil
 		}
