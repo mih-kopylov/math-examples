@@ -8,6 +8,7 @@ import (
 type example struct {
 	initialValue int
 	operations   []operation
+	number       int
 }
 
 func (e *example) exerciseString() string {
@@ -20,7 +21,7 @@ func (e *example) exerciseString() string {
 }
 
 func (e *example) printExercise() {
-	fmt.Printf("%v = ", e.exerciseString())
+	fmt.Printf("%v) %v = ", e.number, e.exerciseString())
 }
 
 func (e *example) answer() int {
