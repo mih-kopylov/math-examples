@@ -3,34 +3,56 @@ package main
 import (
 	"bufio"
 	"errors"
+	"flag"
 	"fmt"
-	"golang.org/x/exp/slices"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-)
 
-const configFileName = "math-examples.yaml"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
+)
 
 var (
 	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 func main() {
-
-	params, err := readParams()
+	app, err := readParams()
 	if err != nil {
 		fmt.Println("Не удалось прочитать конфигурацию, похоже, она повреждена.")
 		waitForEnter()
 		panic(err)
 	}
 
+	profileName := flag.String("p", "", "Profile to use")
+	flag.Parse()
+
+	if *profileName == "" {
+		fmt.Println("Не передано имя профиля. Используйте -p аргумент")
+		waitForEnter()
+		os.Exit(1)
+	}
+
+	profile, exists := app.Profiles[*profileName]
+	if !exists {
+		fmt.Println(
+			fmt.Sprintf(
+				"Не удалось найти профиль %s. Известные профили: %s", *profileName, maps.Keys(app.Profiles),
+			),
+		)
+		waitForEnter()
+		os.Exit(1)
+	}
+
+	fmt.Println(fmt.Sprintf("Добро пожаловать, %s!", *profileName))
+
 	st := newStat()
 	fmt.Printf("Начали решать %v\n", time.Now().Format(time.DateTime))
-	for i := 0; i < params.ExamplesCount; i++ {
-		ex, err := generateExample(params, st, i+1)
+	for i := 0; i < profile.ExamplesCount; i++ {
+		ex, err := generateExample(&profile, st, i+1)
 		if err != nil {
 			if errors.Is(err, errUnableToGenerateExample) {
 				fmt.Println("Не удалось придумать пример с заданной конфигурацией. Проверьте конфигурацию.")
@@ -43,20 +65,20 @@ func main() {
 		userAnswer := readAnswer(ex)
 		ans := st.add(ex, userAnswer)
 
-		if params.ShowCorrectAnswerAfter == afterEach {
+		if profile.ShowCorrectAnswerAfter == afterEach {
 			ans.printCorrectAnswer()
 		}
 	}
 
 	fmt.Println("================")
-	if params.ShowCorrectAnswerAfter == afterAll {
+	if profile.ShowCorrectAnswerAfter == afterAll {
 		for _, a := range st.answers {
 			a.ex.printExercise()
 			a.printAnswer()
 			a.printCorrectAnswer()
 		}
 	}
-	fmt.Printf("Правильных ответов: %v из %v\n", st.getCorrectAnswersCount(), params.ExamplesCount)
+	fmt.Printf("Правильных ответов: %v из %v\n", st.getCorrectAnswersCount(), profile.ExamplesCount)
 	fmt.Printf("Затраченное время: %v\n", st.getTotalTime().Format("04:05"))
 	waitForEnter()
 }
@@ -90,7 +112,7 @@ var (
 	errTooFrequentExampleAnswer  = errors.New("too frequent example answer")
 )
 
-func generateExample(params *exampleParams, st *stat, number int) (*example, error) {
+func generateExample(params *profileParams, st *stat, number int) (*example, error) {
 	for i := 0; ; i++ {
 		result, err := tryGenerateExample(params, st)
 		if err == nil {
@@ -103,7 +125,7 @@ func generateExample(params *exampleParams, st *stat, number int) (*example, err
 	}
 }
 
-func tryGenerateExample(params *exampleParams, st *stat) (*example, error) {
+func tryGenerateExample(params *profileParams, st *stat) (*example, error) {
 	result := example{}
 	result.initialValue = generateOperand(params.AvailableOperands)
 	for i := 0; i < params.OperandsCount-1; i++ {
@@ -119,7 +141,7 @@ func tryGenerateExample(params *exampleParams, st *stat) (*example, error) {
 	return &result, nil
 }
 
-func generateOperationWithinBounds(result example, params *exampleParams) (operation, error) {
+func generateOperationWithinBounds(result example, params *profileParams) (operation, error) {
 	for i := 0; ; i++ {
 		op := generateOperation(params)
 		temporaryOperations := slices.Clone(result.operations)
@@ -137,11 +159,11 @@ func generateOperationWithinBounds(result example, params *exampleParams) (opera
 	}
 }
 
-func withinBounds(answer int, params *exampleParams) bool {
+func withinBounds(answer int, params *profileParams) bool {
 	return answer >= params.MinBoundary && answer <= params.MaxBoundary
 }
 
-func generateOperation(params *exampleParams) operation {
+func generateOperation(params *profileParams) operation {
 	operationTypeIndex := r.Intn(len(params.AvailableOperationTypes))
 	opType := params.AvailableOperationTypes[operationTypeIndex]
 
