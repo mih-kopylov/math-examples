@@ -2,11 +2,16 @@ package main
 
 import (
 	"errors"
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
-type exampleParams struct {
+type appParams struct {
+	Profiles map[string]profileParams
+}
+
+type profileParams struct {
 	ExamplesCount           int               `yaml:"examplesCount"`
 	MinBoundary             int               `yaml:"minBoundary"`
 	MaxBoundary             int               `yaml:"maxBoundary"`
@@ -17,6 +22,8 @@ type exampleParams struct {
 }
 
 type operationType string
+
+const configFileName = "math-examples.yaml"
 
 const (
 	plusOperationType  operationType = "plus"
@@ -30,17 +37,21 @@ const (
 	afterAll  correctAnswerMode = "all"
 )
 
-func readParams() (*exampleParams, error) {
+func readParams() (*appParams, error) {
 	_, err := os.Stat(configFileName)
 	if errors.Is(err, os.ErrNotExist) {
-		defaultParams := exampleParams{
-			ExamplesCount:           10,
-			MinBoundary:             0,
-			MaxBoundary:             9,
-			OperandsCount:           2,
-			ShowCorrectAnswerAfter:  afterEach,
-			AvailableOperationTypes: []operationType{plusOperationType, minusOperationType},
-			AvailableOperands:       []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		defaultParams := appParams{
+			Profiles: map[string]profileParams{
+				"Имя": {
+					ExamplesCount:           10,
+					MinBoundary:             0,
+					MaxBoundary:             9,
+					OperandsCount:           2,
+					ShowCorrectAnswerAfter:  afterEach,
+					AvailableOperationTypes: []operationType{plusOperationType, minusOperationType},
+					AvailableOperands:       []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+				},
+			},
 		}
 
 		bytes, err := yaml.Marshal(defaultParams)
@@ -59,7 +70,7 @@ func readParams() (*exampleParams, error) {
 		return nil, err
 	}
 
-	var result exampleParams
+	var result appParams
 
 	err = yaml.Unmarshal(bytes, &result)
 	if err != nil {
