@@ -38,16 +38,12 @@ func main() {
 
 	profile, exists := app.Profiles[*profileName]
 	if !exists {
-		fmt.Println(
-			fmt.Sprintf(
-				"Не удалось найти профиль %s. Известные профили: %s", *profileName, maps.Keys(app.Profiles),
-			),
-		)
+		fmt.Printf("Не удалось найти профиль %s. Известные профили: %s\n", *profileName, maps.Keys(app.Profiles))
 		waitForEnter()
 		os.Exit(1)
 	}
 
-	fmt.Println(fmt.Sprintf("Добро пожаловать, %s!", *profileName))
+	fmt.Printf("Добро пожаловать, %s!\n", *profileName)
 
 	st := newStat()
 	fmt.Printf("Начали решать %v\n", time.Now().Format(time.DateTime))
