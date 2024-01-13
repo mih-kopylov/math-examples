@@ -1,17 +1,18 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExample(t *testing.T) {
-	e := example{
+	e := Example{
 		initialValue: 2,
 		operations: []operation{
 			&plusOperation{valueToAdd: 3},
 			&minusOperation{valueToSubtract: 1},
 		},
 	}
-	assert.Equal(t, 4, e.answer())
+	assert.Equal(t, 4, e.Answer())
 }

@@ -1,36 +1,37 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
-type stat struct {
-	answers []answer
-	start   time.Time
+type Stat struct {
+	answers            []Answer
+	totalExamplesCount int
+	start              time.Time
 }
 
-func newStat() *stat {
-	return &stat{
-		answers: nil,
-		start:   time.Now(),
+func NewStat(totalExamplesCount int) *Stat {
+	return &Stat{
+		answers:            nil,
+		totalExamplesCount: totalExamplesCount,
+		start:              time.Now(),
 	}
 }
 
-func (s *stat) getTotalTime() time.Time {
+func (s *Stat) getTotalTime() time.Time {
 	return time.Time{}.Add(time.Since(s.start))
 }
 
-func (s *stat) tooFrequentAnswer(value int) bool {
+func (s *Stat) TooFrequentAnswer(value int) bool {
 	statMap := make(map[int]int)
 	for _, v := range s.answers {
-		exAnswer := v.ex.answer()
+		exAnswer := v.example.Answer()
 		statMap[exAnswer] = statMap[exAnswer] + 1
 	}
-	return tooFrequentAnswer(value, statMap)
+	return s.tooFrequentAnswer(value, statMap)
 }
 
-func tooFrequentAnswer(value int, statMap map[int]int) bool {
+func (s *Stat) tooFrequentAnswer(value int, statMap map[int]int) bool {
 	if len(statMap) == 0 {
 		return false
 	}
@@ -49,38 +50,31 @@ func tooFrequentAnswer(value int, statMap map[int]int) bool {
 
 }
 
-func (s *stat) add(ex *example, userAnswer int) *answer {
-	result := answer{
-		ex:     ex,
-		answer: userAnswer,
-	}
-	s.answers = append(s.answers, result)
-	return &result
+func (s *Stat) AddAnswer(example *Example, answer *Answer) {
+	s.answers = append(s.answers, *answer)
 }
 
-func (s *stat) getCorrectAnswersCount() int {
+func (s *Stat) getCorrectAnswersCount() int {
 	result := 0
 	for _, a := range s.answers {
-		if a.ex.isCorrectAnswer(a.answer) {
+		if a.example.isCorrectAnswer(a.value) {
 			result++
 		}
 	}
 	return result
 }
 
-type answer struct {
-	ex     *example
-	answer int
+func (s *Stat) PrintStartMessage(printer Printer) {
+	printer.Println("Начали решать %v", s.start.Format(time.DateTime))
 }
 
-func (a *answer) printCorrectAnswer() {
-	if a.ex.isCorrectAnswer(a.answer) {
-		fmt.Println("Правильно!")
-	} else {
-		fmt.Printf("Неправильно. Правильный ответ %v\n", a.ex.answer())
+func (s *Stat) PrintAllAnswers(printer Printer) {
+	for i, a := range s.answers {
+		printer.Println("%v) %v = %v %v", i+1, a.example.ExerciseString(), a.value, a.GetAnalysis())
 	}
 }
 
-func (a *answer) printAnswer() {
-	fmt.Printf("%v ", a.answer)
+func (s *Stat) PrintStatistics(printer Printer) {
+	printer.Println("Правильных ответов: %v из %v", s.getCorrectAnswersCount(), s.totalExamplesCount)
+	printer.Println("Затраченное время: %v", s.getTotalTime().Format("04:05"))
 }
