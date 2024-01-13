@@ -7,7 +7,7 @@ import (
 )
 
 func TestTooFrequentAnswer(t *testing.T) {
-	stat := NewStat()
+	stat := NewStat(5)
 	assert.True(t, stat.tooFrequentAnswer(5, map[int]int{1: 1, 2: 2, 5: 3}))
 	assert.True(t, stat.tooFrequentAnswer(5, map[int]int{5: 1}))
 	assert.False(t, stat.tooFrequentAnswer(5, map[int]int{}))
