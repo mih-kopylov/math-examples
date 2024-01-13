@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/joomcode/errorx"
+	"golang.org/x/exp/slices"
 )
 
 var (
