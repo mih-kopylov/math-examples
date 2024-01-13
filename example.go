@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-type example struct {
+type Example struct {
 	initialValue int
 	operations   []operation
-	number       int
+	index        int
 }
 
-func (e *example) exerciseString() string {
+func (e *Example) ExerciseString() string {
 	builder := strings.Builder{}
 	builder.WriteString(fmt.Sprintf("%v", e.initialValue))
 	for _, o := range e.operations {
@@ -20,11 +20,7 @@ func (e *example) exerciseString() string {
 	return builder.String()
 }
 
-func (e *example) printExercise() {
-	fmt.Printf("%v) %v = ", e.number, e.exerciseString())
-}
-
-func (e *example) answer() int {
+func (e *Example) Answer() int {
 	result := e.initialValue
 	for _, o := range e.operations {
 		result = o.apply(result)
@@ -32,6 +28,6 @@ func (e *example) answer() int {
 	return result
 }
 
-func (e *example) isCorrectAnswer(value int) bool {
-	return e.answer() == value
+func (e *Example) isCorrectAnswer(value int) bool {
+	return e.Answer() == value
 }
