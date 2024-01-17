@@ -29,13 +29,13 @@ Example:
 
 ```yaml
 profiles:
-  Имя:                           # User profile name, used to differentiate users configuration 
-    examplesCount: 10            # Number of exercises to generate
-    minBoundary: 0               # Minimal value that is calculated on each iteration
-    maxBoundary: 9               # Maximum value that is calculated on each iteration 
-    operandsCount: 2             # Number of operands in each exercise
-    showCorrectAnswerAfter: each # Use 'each' to show a correct answer after each exercise or 'all' to show summary after all exercises
-    availableOperands:           # Available operands values used in generation
+  Имя:                               # User profile name, used to differentiate users configuration 
+    examplesCount: 10                # Number of exercises to generate
+    minBoundary: 0                   # Minimal value that is calculated on each iteration
+    maxBoundary: 9                   # Maximum value that is calculated on each iteration 
+    operandsCount: 2                 # Number of operands in each exercise
+    showCorrectAnswerAfter: each     # Use 'each' to show a correct answer after each exercise or 'all' to show summary after all exercises
+    availableOperands:               # Available operands values used in plus and minus generation
       - 1
       - 2
       - 3
@@ -45,7 +45,19 @@ profiles:
       - 7
       - 8
       - 9
-    availableOperationTypes:     # Available operations used in exercises
+    availableMultiplicationOperands: # Available operands values used for multiplication and division
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+    availableOperationTypes:         # Available operations used in exercises
       - plus
       - minus
+      - multiply
+      - divide
 ```

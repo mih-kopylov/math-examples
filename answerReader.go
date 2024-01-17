@@ -15,13 +15,13 @@ var (
 )
 
 type AnswerReader interface {
-	Read(printer Printer, index int, example *Example) (*Answer, error)
+	Read(printer Printer, index int, example Example) (*Answer, error)
 }
 
 type ConsoleAnswerReader struct {
 }
 
-func (r *ConsoleAnswerReader) Read(printer Printer, index int, example *Example) (*Answer, error) {
+func (r *ConsoleAnswerReader) Read(printer Printer, index int, example Example) (*Answer, error) {
 	for {
 		printer.Print("%v) %v = ", index, example.ExerciseString())
 

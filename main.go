@@ -3,13 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/rand"
 	"os"
-	"time"
-)
-
-var (
-	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 func main() {

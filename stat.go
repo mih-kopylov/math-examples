@@ -5,16 +5,14 @@ import (
 )
 
 type Stat struct {
-	answers            []Answer
-	totalExamplesCount int
-	start              time.Time
+	answers []Answer
+	start   time.Time
 }
 
-func NewStat(totalExamplesCount int) *Stat {
+func NewStat() *Stat {
 	return &Stat{
-		answers:            nil,
-		totalExamplesCount: totalExamplesCount,
-		start:              time.Now(),
+		answers: nil,
+		start:   time.Now(),
 	}
 }
 
@@ -50,14 +48,14 @@ func (s *Stat) tooFrequentAnswer(value int, statMap map[int]int) bool {
 
 }
 
-func (s *Stat) AddAnswer(example *Example, answer *Answer) {
+func (s *Stat) AddAnswer(answer *Answer) {
 	s.answers = append(s.answers, *answer)
 }
 
 func (s *Stat) getCorrectAnswersCount() int {
 	result := 0
 	for _, a := range s.answers {
-		if a.example.isCorrectAnswer(a.value) {
+		if a.example.Answer() == a.value {
 			result++
 		}
 	}
@@ -75,6 +73,6 @@ func (s *Stat) PrintAllAnswers(printer Printer) {
 }
 
 func (s *Stat) PrintStatistics(printer Printer) {
-	printer.Println("Правильных ответов: %v из %v", s.getCorrectAnswersCount(), s.totalExamplesCount)
+	printer.Println("Правильных ответов: %v из %v", s.getCorrectAnswersCount(), len(s.answers))
 	printer.Println("Затраченное время: %v", s.getTotalTime().Format("04:05"))
 }

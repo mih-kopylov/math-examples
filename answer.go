@@ -5,12 +5,12 @@ import (
 )
 
 type Answer struct {
-	example *Example
+	example Example
 	value   int
 }
 
 func (a *Answer) GetAnalysis() string {
-	if a.example.isCorrectAnswer(a.value) {
+	if a.example.Answer() == a.value {
 		return "Правильно!"
 	}
 	return fmt.Sprintf("Неправильно. Правильный ответ %v", a.example.Answer())

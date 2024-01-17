@@ -7,12 +7,11 @@ import (
 )
 
 func TestExample(t *testing.T) {
-	e := Example{
-		initialValue: 2,
-		operations: []operation{
-			&plusOperation{valueToAdd: 3},
-			&minusOperation{valueToSubtract: 1},
+	e := NewOperationExample(
+		2, []Operation{
+			&PlusOperation{valueToAdd: 3},
+			&MinusOperation{valueToSubtract: 1},
 		},
-	}
+	)
 	assert.Equal(t, 4, e.Answer())
 }

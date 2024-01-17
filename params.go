@@ -14,27 +14,30 @@ var (
 	ErrFailReadParams          = errorx.NewType(ErrParamsNamespace, "FailReadParams")
 )
 
+const configFileName = "math-examples.yaml"
+
 type AppParams struct {
 	Profiles map[string]ProfileParams
 }
 
 type ProfileParams struct {
-	ExamplesCount           int               `yaml:"examplesCount"`
-	MinBoundary             int               `yaml:"minBoundary"`
-	MaxBoundary             int               `yaml:"maxBoundary"`
-	OperandsCount           int               `yaml:"operandsCount"`
-	ShowCorrectAnswerAfter  CorrectAnswerMode `yaml:"showCorrectAnswerAfter"`
-	AvailableOperands       []int             `yaml:"availableOperands"`
-	AvailableOperationTypes []OperationType   `yaml:"availableOperationTypes"`
+	ExamplesCount                   int               `yaml:"examplesCount"`
+	MinBoundary                     int               `yaml:"minBoundary"`
+	MaxBoundary                     int               `yaml:"maxBoundary"`
+	OperandsCount                   int               `yaml:"operandsCount"`
+	ShowCorrectAnswerAfter          CorrectAnswerMode `yaml:"showCorrectAnswerAfter"`
+	AvailableOperands               []int             `yaml:"availableOperands"`
+	AvailableMultiplicationOperands []int             `yaml:"availableMultiplicationOperands"`
+	AvailableOperationTypes         []OperationType   `yaml:"availableOperationTypes"`
 }
 
 type OperationType string
 
-const configFileName = "math-examples.yaml"
-
 const (
-	PlusOperationType  OperationType = "plus"
-	MinusOperationType OperationType = "minus"
+	PlusOperationType     OperationType = "plus"
+	MinusOperationType    OperationType = "minus"
+	MultiplyOperationType OperationType = "multiply"
+	DivideOperationType   OperationType = "divide"
 )
 
 type CorrectAnswerMode string
@@ -50,13 +53,19 @@ func ReadParams() (*AppParams, error) {
 		defaultParams := AppParams{
 			Profiles: map[string]ProfileParams{
 				"Имя": {
-					ExamplesCount:           10,
-					MinBoundary:             0,
-					MaxBoundary:             9,
-					OperandsCount:           2,
-					ShowCorrectAnswerAfter:  AfterEach,
-					AvailableOperationTypes: []OperationType{PlusOperationType, MinusOperationType},
-					AvailableOperands:       []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+					ExamplesCount:          10,
+					MinBoundary:            0,
+					MaxBoundary:            100,
+					OperandsCount:          2,
+					ShowCorrectAnswerAfter: AfterEach,
+					AvailableOperationTypes: []OperationType{
+						PlusOperationType,
+						MinusOperationType,
+						MultiplyOperationType,
+						DivideOperationType,
+					},
+					AvailableOperands:               []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+					AvailableMultiplicationOperands: []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
 				},
 			},
 		}
