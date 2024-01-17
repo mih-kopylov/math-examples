@@ -1,39 +1,39 @@
 package main
 
-type operation interface {
+type Operation interface {
 	apply(initialValue int) int
 	operationString() string
 	operand() int
 }
 
-type plusOperation struct {
+type PlusOperation struct {
 	valueToAdd int
 }
 
-func (p *plusOperation) apply(initialValue int) int {
+func (p *PlusOperation) apply(initialValue int) int {
 	return initialValue + p.valueToAdd
 }
 
-func (p *plusOperation) operationString() string {
+func (p *PlusOperation) operationString() string {
 	return "+"
 }
 
-func (p *plusOperation) operand() int {
+func (p *PlusOperation) operand() int {
 	return p.valueToAdd
 }
 
-type minusOperation struct {
+type MinusOperation struct {
 	valueToSubtract int
 }
 
-func (p *minusOperation) apply(initialValue int) int {
+func (p *MinusOperation) apply(initialValue int) int {
 	return initialValue - p.valueToSubtract
 }
 
-func (p *minusOperation) operationString() string {
+func (p *MinusOperation) operationString() string {
 	return "-"
 }
 
-func (p *minusOperation) operand() int {
+func (p *MinusOperation) operand() int {
 	return p.valueToSubtract
 }

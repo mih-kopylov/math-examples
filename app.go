@@ -11,13 +11,13 @@ func runApplication() error {
 		return err
 	}
 
-	st := NewStat(profile.ExamplesCount)
-	generator := NewGenerator(profile)
+	st := NewStat()
+	generator := NewOperandGenerator(profile)
 	answerReader := NewConsoleAnswerReader()
 
 	st.PrintStartMessage(printer)
 	for i := 0; i < profile.ExamplesCount; i++ {
-		example, err := generator.GenerateExample(profile, st, i+1)
+		example, err := generator.GenerateExample(profile, st)
 		if err != nil {
 			return err
 		}
@@ -27,7 +27,7 @@ func runApplication() error {
 			return err
 		}
 
-		st.AddAnswer(example, answer)
+		st.AddAnswer(answer)
 
 		if profile.ShowCorrectAnswerAfter == AfterEach {
 			printer.Println(answer.GetAnalysis())
