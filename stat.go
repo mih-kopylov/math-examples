@@ -20,34 +20,6 @@ func (s *Stat) getTotalTime() time.Time {
 	return time.Time{}.Add(time.Since(s.start))
 }
 
-func (s *Stat) TooFrequentAnswer(value int) bool {
-	statMap := make(map[int]int)
-	for _, v := range s.answers {
-		exAnswer := v.example.Answer()
-		statMap[exAnswer] = statMap[exAnswer] + 1
-	}
-	return s.tooFrequentAnswer(value, statMap)
-}
-
-func (s *Stat) tooFrequentAnswer(value int, statMap map[int]int) bool {
-	if len(statMap) == 0 {
-		return false
-	}
-
-	thisAnswerCount, found := statMap[value]
-	thisAnswerCount++
-	if found && len(statMap) == 1 && thisAnswerCount > 1 {
-		return true
-	}
-	for _, count := range statMap {
-		if thisAnswerCount-count > 1 {
-			return true
-		}
-	}
-	return false
-
-}
-
 func (s *Stat) AddAnswer(answer *Answer) {
 	s.answers = append(s.answers, *answer)
 }

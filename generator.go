@@ -12,5 +12,5 @@ var (
 )
 
 type Generator interface {
-	GenerateExample(params *ProfileParams, stat *Stat) (Example, error)
+	GenerateExample(params *ProfileParams, distribution *Distribution[int]) (Example, error)
 }
