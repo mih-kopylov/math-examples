@@ -26,10 +26,11 @@ func NewOperationGenerator(profile *ProfileParams) Generator {
 	}
 }
 
-func (g *OperationGenerator) GenerateExample(params *ProfileParams, stat *Stat) (Example, error) {
+func (g *OperationGenerator) GenerateExample(params *ProfileParams, distribution *Distribution[int]) (Example, error) {
 	for tryNumber := 0; ; tryNumber++ {
-		result, err := g.tryGenerateExample(params, stat)
+		result, err := g.tryGenerateExample(params, distribution)
 		if err == nil {
+			distribution.Add(result.Answer())
 			return result, nil
 		}
 
@@ -39,7 +40,9 @@ func (g *OperationGenerator) GenerateExample(params *ProfileParams, stat *Stat) 
 	}
 }
 
-func (g *OperationGenerator) tryGenerateExample(params *ProfileParams, stat *Stat) (Example, error) {
+func (g *OperationGenerator) tryGenerateExample(params *ProfileParams, distribution *Distribution[int]) (
+	Example, error,
+) {
 	initialValue := g.randomOperand(params.AvailableOperands)
 	var operations []Operation
 
@@ -53,7 +56,7 @@ func (g *OperationGenerator) tryGenerateExample(params *ProfileParams, stat *Sta
 	}
 	result := NewOperationExample(initialValue, operations)
 
-	if stat.TooFrequentAnswer(result.Answer()) {
+	if distribution.IsTooFrequent(result.Answer()) {
 		return nil, ErrTooFrequentExampleAnswer.NewWithNoMessage()
 	}
 
