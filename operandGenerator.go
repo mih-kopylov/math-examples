@@ -116,57 +116,83 @@ func (g *OperandGenerator) generateOperandBasedOn(
 
 	switch operationType {
 	case PlusOperationType:
-		newOperand := NewSingleValueOperand(g.randomValue(params.AvailableOperands))
-		if direction == RightDirection {
-			return NewSumOperand(originalOperand, newOperand), nil
-		}
-		return NewSumOperand(newOperand, originalOperand), nil
+		return g.generateSumOperand(params, direction, originalOperand)
 	case MinusOperationType:
-		newOperand := NewSingleValueOperand(g.randomValue(params.AvailableOperands))
-		if direction == RightDirection {
-			return NewSubtractOperand(originalOperand, newOperand), nil
-		}
-		return NewSubtractOperand(newOperand, originalOperand), nil
+		return g.generateSubtractOperand(params, direction, originalOperand)
 	case MultiplyOperationType:
-		if !slices.Contains(params.AvailableMultiplicationOperands, originalOperand.Value()) {
-			return nil, ErrUnableToGenerateOperand.NewWithNoMessage()
-		}
-		if originalOperand.NeedsParenthesis() {
-			originalOperand = NewParenthesisOperand(originalOperand)
-		}
-		newOperand := NewSingleValueOperand(g.randomValue(params.AvailableMultiplicationOperands))
-		if direction == RightDirection {
-			return NewMultiplyOperand(originalOperand, newOperand), nil
-		}
-		return NewMultiplyOperand(newOperand, originalOperand), nil
+		return g.generateMultiplyOperand(params, originalOperand, direction)
 	case DivideOperationType:
-		if originalOperand.NeedsParenthesis() {
-			originalOperand = NewParenthesisOperand(originalOperand)
-		}
-		var availableDivideOperands []int
-		for _, op := range params.AvailableMultiplicationOperands {
-			if op == 0 {
-				continue
-			}
-			if originalOperand.Value()%op != 0 {
-				continue
-			}
-			result := originalOperand.Value() / op
-			if !slices.Contains(params.AvailableOperands, result) {
-				continue
-			}
-			availableDivideOperands = append(availableDivideOperands, op)
-		}
-
-		if len(availableDivideOperands) == 0 {
-			return nil, ErrUnableToGenerateOperand.NewWithNoMessage()
-		}
-
-		newOperand := NewSingleValueOperand(g.randomValue(availableDivideOperands))
-		return NewDivideOperand(originalOperand, newOperand), nil
+		return g.generateDivideOperand(originalOperand, params)
 	default:
 		return nil, ErrUnsupportedOperationType.New("type: %v", operationType)
 	}
+}
+
+func (g *OperandGenerator) generateDivideOperand(originalOperand Operand, params *ProfileParams) (Operand, error) {
+	if originalOperand.NeedsParenthesis() {
+		originalOperand = NewParenthesisOperand(originalOperand)
+	}
+	var availableDivideOperands []int
+	for _, op := range params.AvailableMultiplicationOperands {
+		if op == 0 {
+			continue
+		}
+		if originalOperand.Value()%op != 0 {
+			continue
+		}
+		result := originalOperand.Value() / op
+		if !slices.Contains(params.AvailableOperands, result) {
+			continue
+		}
+		availableDivideOperands = append(availableDivideOperands, op)
+	}
+
+	if len(availableDivideOperands) == 0 {
+		return nil, ErrUnableToGenerateOperand.NewWithNoMessage()
+	}
+
+	newOperand := NewSingleValueOperand(g.randomValue(availableDivideOperands))
+	return NewDivideOperand(originalOperand, newOperand), nil
+}
+
+func (g *OperandGenerator) generateMultiplyOperand(
+	params *ProfileParams, originalOperand Operand, direction Direction,
+) (
+	Operand, error,
+) {
+	if !slices.Contains(params.AvailableMultiplicationOperands, originalOperand.Value()) {
+		return nil, ErrUnableToGenerateOperand.NewWithNoMessage()
+	}
+	if originalOperand.NeedsParenthesis() {
+		originalOperand = NewParenthesisOperand(originalOperand)
+	}
+	newOperand := NewSingleValueOperand(g.randomValue(params.AvailableMultiplicationOperands))
+	if direction == RightDirection {
+		return NewMultiplyOperand(originalOperand, newOperand), nil
+	}
+	return NewMultiplyOperand(newOperand, originalOperand), nil
+}
+
+func (g *OperandGenerator) generateSubtractOperand(
+	params *ProfileParams, direction Direction, originalOperand Operand,
+) (
+	Operand, error,
+) {
+	newOperand := NewSingleValueOperand(g.randomValue(params.AvailableOperands))
+	if direction == RightDirection {
+		return NewSubtractOperand(originalOperand, newOperand), nil
+	}
+	return NewSubtractOperand(newOperand, originalOperand), nil
+}
+
+func (g *OperandGenerator) generateSumOperand(params *ProfileParams, direction Direction, originalOperand Operand) (
+	Operand, error,
+) {
+	newOperand := NewSingleValueOperand(g.randomValue(params.AvailableOperands))
+	if direction == RightDirection {
+		return NewSumOperand(originalOperand, newOperand), nil
+	}
+	return NewSumOperand(newOperand, originalOperand), nil
 }
 
 func (g *OperandGenerator) generateOperationType(
