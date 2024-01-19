@@ -26,8 +26,8 @@ type ProfileParams struct {
 	MaxBoundary                     int               `yaml:"maxBoundary"`
 	OperandsCount                   int               `yaml:"operandsCount"`
 	ShowCorrectAnswerAfter          CorrectAnswerMode `yaml:"showCorrectAnswerAfter"`
-	AvailableOperands               []int             `yaml:"availableOperands"`
-	AvailableMultiplicationOperands []int             `yaml:"availableMultiplicationOperands"`
+	AvailableOperands               []string          `yaml:"availableOperands"`
+	AvailableMultiplicationOperands []string          `yaml:"availableMultiplicationOperands"`
 	AvailableOperationTypes         []OperationType   `yaml:"availableOperationTypes"`
 }
 
@@ -64,8 +64,8 @@ func ReadParams() (*AppParams, error) {
 						MultiplyOperationType,
 						DivideOperationType,
 					},
-					AvailableOperands:               []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
-					AvailableMultiplicationOperands: []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+					AvailableOperands:               []string{"1-100"},
+					AvailableMultiplicationOperands: []string{"1-9"},
 				},
 			},
 		}

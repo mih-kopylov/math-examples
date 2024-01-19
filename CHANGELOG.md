@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Allow defining available operands with ranges
+
 ## [1.6.0] - 2024-01-18
 
 ### Changed
