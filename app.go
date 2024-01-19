@@ -13,7 +13,11 @@ func runApplication() error {
 
 	stat := NewStat()
 	answersDistribution := NewDistribution[int]()
-	generator := NewOperandGenerator(profile)
+	generator, err := NewOperandGenerator(profile)
+	if err != nil {
+		return err
+	}
+
 	answerReader := NewConsoleAnswerReader()
 
 	stat.PrintStartMessage(printer)

@@ -20,8 +20,8 @@ func TestOperandGenerator_GenerateExample(t *testing.T) {
 				MaxBoundary:                     100,
 				OperandsCount:                   2,
 				ShowCorrectAnswerAfter:          "each",
-				AvailableOperands:               []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
-				AvailableMultiplicationOperands: []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+				AvailableOperands:               []string{"1:9"},
+				AvailableMultiplicationOperands: []string{"1:9"},
 				AvailableOperationTypes:         []OperationType{PlusOperationType},
 			}, distribution: NewDistribution[int](), expectedErr: nil,
 		},
@@ -32,8 +32,8 @@ func TestOperandGenerator_GenerateExample(t *testing.T) {
 				MaxBoundary:                     100,
 				OperandsCount:                   2,
 				ShowCorrectAnswerAfter:          "each",
-				AvailableOperands:               []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
-				AvailableMultiplicationOperands: []int{1, 2, 3, 4, 5, 6, 7, 8, 9},
+				AvailableOperands:               []string{"1:9"},
+				AvailableMultiplicationOperands: []string{"1:9"},
 				AvailableOperationTypes:         []OperationType{MinusOperationType},
 			}, distribution: NewDistribution[int](), expectedErr: nil,
 		},
@@ -44,23 +44,20 @@ func TestOperandGenerator_GenerateExample(t *testing.T) {
 				MaxBoundary:                     100,
 				OperandsCount:                   2,
 				ShowCorrectAnswerAfter:          "each",
-				AvailableOperands:               []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-				AvailableMultiplicationOperands: []int{2, 3, 4, 5, 6, 7, 8, 9},
+				AvailableOperands:               []string{"1:11"},
+				AvailableMultiplicationOperands: []string{"2:9"},
 				AvailableOperationTypes:         []OperationType{MultiplyOperationType},
 			}, distribution: NewDistribution[int](), expectedErr: nil,
 		},
 		{
 			name: "divide", profile: &ProfileParams{
-				ExamplesCount:          10,
-				MinBoundary:            2,
-				MaxBoundary:            100,
-				OperandsCount:          2,
-				ShowCorrectAnswerAfter: "each",
-				AvailableOperands: []int{
-					2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-					30,
-				},
-				AvailableMultiplicationOperands: []int{2, 3, 4, 5, 6, 7, 8, 9},
+				ExamplesCount:                   10,
+				MinBoundary:                     2,
+				MaxBoundary:                     100,
+				OperandsCount:                   2,
+				ShowCorrectAnswerAfter:          "each",
+				AvailableOperands:               []string{"2:30"},
+				AvailableMultiplicationOperands: []string{"2:9"},
 				AvailableOperationTypes:         []OperationType{DivideOperationType},
 			}, distribution: NewDistribution[int](), expectedErr: nil,
 		},
@@ -71,38 +68,32 @@ func TestOperandGenerator_GenerateExample(t *testing.T) {
 				MaxBoundary:                     200,
 				OperandsCount:                   3,
 				ShowCorrectAnswerAfter:          "each",
-				AvailableOperands:               []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-				AvailableMultiplicationOperands: []int{2, 3, 4, 5, 6, 7, 8, 9},
+				AvailableOperands:               []string{"1:15"},
+				AvailableMultiplicationOperands: []string{"2:9"},
 				AvailableOperationTypes:         []OperationType{PlusOperationType, MultiplyOperationType},
 			}, distribution: NewDistribution[int](), expectedErr: nil,
 		},
 		{
 			name: "parenthesis for minus and divide", profile: &ProfileParams{
-				ExamplesCount:          10,
-				MinBoundary:            1,
-				MaxBoundary:            200,
-				OperandsCount:          3,
-				ShowCorrectAnswerAfter: "each",
-				AvailableOperands: []int{
-					2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-					30,
-				},
-				AvailableMultiplicationOperands: []int{2, 3, 4, 5, 6, 7, 8, 9},
+				ExamplesCount:                   10,
+				MinBoundary:                     1,
+				MaxBoundary:                     200,
+				OperandsCount:                   3,
+				ShowCorrectAnswerAfter:          "each",
+				AvailableOperands:               []string{"2:30"},
+				AvailableMultiplicationOperands: []string{"2:9"},
 				AvailableOperationTypes:         []OperationType{MinusOperationType, DivideOperationType},
 			}, distribution: NewDistribution[int](), expectedErr: nil,
 		},
 		{
 			name: "all operations", profile: &ProfileParams{
-				ExamplesCount:          10,
-				MinBoundary:            1,
-				MaxBoundary:            200,
-				OperandsCount:          5,
-				ShowCorrectAnswerAfter: "each",
-				AvailableOperands: []int{
-					2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-					30,
-				},
-				AvailableMultiplicationOperands: []int{2, 3, 4, 5, 6, 7, 8, 9},
+				ExamplesCount:                   10,
+				MinBoundary:                     1,
+				MaxBoundary:                     200,
+				OperandsCount:                   5,
+				ShowCorrectAnswerAfter:          "each",
+				AvailableOperands:               []string{"2:30"},
+				AvailableMultiplicationOperands: []string{"2:9"},
 				AvailableOperationTypes: []OperationType{
 					PlusOperationType, MinusOperationType, MultiplyOperationType, DivideOperationType,
 				},
@@ -115,8 +106,8 @@ func TestOperandGenerator_GenerateExample(t *testing.T) {
 				MaxBoundary:                     10,
 				OperandsCount:                   2,
 				ShowCorrectAnswerAfter:          "each",
-				AvailableOperands:               []int{9},
-				AvailableMultiplicationOperands: []int{9},
+				AvailableOperands:               []string{"9"},
+				AvailableMultiplicationOperands: []string{"9"},
 				AvailableOperationTypes:         []OperationType{PlusOperationType},
 			}, distribution: NewDistribution[int](),
 			expectedErr: ErrUnableToGenerateExample.New("Не удалось придумать пример с заданной конфигурацией. Проверьте конфигурацию."),
@@ -125,7 +116,11 @@ func TestOperandGenerator_GenerateExample(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				generator := NewOperandGenerator(tt.profile)
+				generator, err := NewOperandGenerator(tt.profile)
+				if !assert.NoError(t, err) {
+					return
+				}
+
 				for i := 0; i < tt.profile.ExamplesCount; i++ {
 					actual, err := generator.GenerateExample(tt.profile, tt.distribution)
 

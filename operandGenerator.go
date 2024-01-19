@@ -25,16 +25,32 @@ const (
 var AvailableDirections = []Direction{LeftDirection, RightDirection}
 
 type OperandGenerator struct {
-	random  *rand.Rand
-	profile *ProfileParams
+	random                          *rand.Rand
+	profile                         *ProfileParams
+	availableOperands               []int
+	availableMultiplicationOperands []int
 }
 
-func NewOperandGenerator(profile *ProfileParams) Generator {
+func NewOperandGenerator(profile *ProfileParams) (Generator, error) {
 	random := rand.New(rand.NewSource(time.Now().UnixNano()))
-	return &OperandGenerator{
-		random:  random,
-		profile: profile,
+
+	rangeConverter := NewRangeConverter()
+	availableOperands, err := rangeConverter.RangeToInt(profile.AvailableOperands)
+	if err != nil {
+		return nil, err
 	}
+
+	availableMultiplicationOperands, err := rangeConverter.RangeToInt(profile.AvailableMultiplicationOperands)
+	if err != nil {
+		return nil, err
+	}
+
+	return &OperandGenerator{
+		random:                          random,
+		profile:                         profile,
+		availableOperands:               availableOperands,
+		availableMultiplicationOperands: availableMultiplicationOperands,
+	}, nil
 }
 
 func (g *OperandGenerator) GenerateExample(params *ProfileParams, distribution *Distribution[int]) (Example, error) {
@@ -52,7 +68,7 @@ func (g *OperandGenerator) GenerateExample(params *ProfileParams, distribution *
 }
 
 func (g *OperandGenerator) tryGenerateExample(params *ProfileParams, distribution *Distribution[int]) (Example, error) {
-	result := NewSingleValueOperand(g.randomValue(params.AvailableOperands))
+	result := NewSingleValueOperand(g.randomValue(g.availableOperands))
 
 	operationTypeDistribution := NewDistributionWithKnownKeys[OperationType](params.AvailableOperationTypes)
 	directionDistribution := NewDistributionWithKnownKeys[Direction](AvailableDirections)
@@ -116,24 +132,24 @@ func (g *OperandGenerator) generateOperandBasedOn(
 
 	switch operationType {
 	case PlusOperationType:
-		return g.generateSumOperand(params, direction, originalOperand)
+		return g.generateSumOperand(direction, originalOperand)
 	case MinusOperationType:
-		return g.generateSubtractOperand(params, direction, originalOperand)
+		return g.generateSubtractOperand(direction, originalOperand)
 	case MultiplyOperationType:
-		return g.generateMultiplyOperand(params, originalOperand, direction)
+		return g.generateMultiplyOperand(originalOperand, direction)
 	case DivideOperationType:
-		return g.generateDivideOperand(originalOperand, params)
+		return g.generateDivideOperand(originalOperand)
 	default:
 		return nil, ErrUnsupportedOperationType.New("type: %v", operationType)
 	}
 }
 
-func (g *OperandGenerator) generateDivideOperand(originalOperand Operand, params *ProfileParams) (Operand, error) {
+func (g *OperandGenerator) generateDivideOperand(originalOperand Operand) (Operand, error) {
 	if originalOperand.NeedsParenthesis() {
 		originalOperand = NewParenthesisOperand(originalOperand)
 	}
 	var availableDivideOperands []int
-	for _, op := range params.AvailableMultiplicationOperands {
+	for _, op := range g.availableMultiplicationOperands {
 		if op == 0 {
 			continue
 		}
@@ -141,7 +157,7 @@ func (g *OperandGenerator) generateDivideOperand(originalOperand Operand, params
 			continue
 		}
 		result := originalOperand.Value() / op
-		if !slices.Contains(params.AvailableOperands, result) {
+		if !slices.Contains(g.availableOperands, result) {
 			continue
 		}
 		availableDivideOperands = append(availableDivideOperands, op)
@@ -155,40 +171,30 @@ func (g *OperandGenerator) generateDivideOperand(originalOperand Operand, params
 	return NewDivideOperand(originalOperand, newOperand), nil
 }
 
-func (g *OperandGenerator) generateMultiplyOperand(
-	params *ProfileParams, originalOperand Operand, direction Direction,
-) (
-	Operand, error,
-) {
-	if !slices.Contains(params.AvailableMultiplicationOperands, originalOperand.Value()) {
+func (g *OperandGenerator) generateMultiplyOperand(originalOperand Operand, direction Direction) (Operand, error) {
+	if !slices.Contains(g.availableMultiplicationOperands, originalOperand.Value()) {
 		return nil, ErrUnableToGenerateOperand.NewWithNoMessage()
 	}
 	if originalOperand.NeedsParenthesis() {
 		originalOperand = NewParenthesisOperand(originalOperand)
 	}
-	newOperand := NewSingleValueOperand(g.randomValue(params.AvailableMultiplicationOperands))
+	newOperand := NewSingleValueOperand(g.randomValue(g.availableMultiplicationOperands))
 	if direction == RightDirection {
 		return NewMultiplyOperand(originalOperand, newOperand), nil
 	}
 	return NewMultiplyOperand(newOperand, originalOperand), nil
 }
 
-func (g *OperandGenerator) generateSubtractOperand(
-	params *ProfileParams, direction Direction, originalOperand Operand,
-) (
-	Operand, error,
-) {
-	newOperand := NewSingleValueOperand(g.randomValue(params.AvailableOperands))
+func (g *OperandGenerator) generateSubtractOperand(direction Direction, originalOperand Operand) (Operand, error) {
+	newOperand := NewSingleValueOperand(g.randomValue(g.availableOperands))
 	if direction == RightDirection {
 		return NewSubtractOperand(originalOperand, newOperand), nil
 	}
 	return NewSubtractOperand(newOperand, originalOperand), nil
 }
 
-func (g *OperandGenerator) generateSumOperand(params *ProfileParams, direction Direction, originalOperand Operand) (
-	Operand, error,
-) {
-	newOperand := NewSingleValueOperand(g.randomValue(params.AvailableOperands))
+func (g *OperandGenerator) generateSumOperand(direction Direction, originalOperand Operand) (Operand, error) {
+	newOperand := NewSingleValueOperand(g.randomValue(g.availableOperands))
 	if direction == RightDirection {
 		return NewSumOperand(originalOperand, newOperand), nil
 	}
