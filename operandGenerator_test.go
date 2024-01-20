@@ -74,6 +74,20 @@ func TestOperandGenerator_GenerateExample(t *testing.T) {
 			}, distribution: NewDistribution[int](), expectedErr: nil,
 		},
 		{
+			name: "parenthesis for plus, minus and multiply", profile: &ProfileParams{
+				ExamplesCount:                   10,
+				MinBoundary:                     1,
+				MaxBoundary:                     100,
+				OperandsCount:                   4,
+				ShowCorrectAnswerAfter:          "each",
+				AvailableOperands:               []string{"1:50"},
+				AvailableMultiplicationOperands: []string{"2:9"},
+				AvailableOperationTypes: []OperationType{
+					PlusOperationType, MinusOperationType, MultiplyOperationType,
+				},
+			}, distribution: NewDistribution[int](), expectedErr: nil,
+		},
+		{
 			name: "parenthesis for minus and divide", profile: &ProfileParams{
 				ExamplesCount:                   10,
 				MinBoundary:                     1,
