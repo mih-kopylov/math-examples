@@ -190,6 +190,9 @@ func (g *OperandGenerator) generateSubtractOperand(direction Direction, original
 	if direction == RightDirection {
 		return NewSubtractOperand(originalOperand, newOperand), nil
 	}
+	if originalOperand.NeedsParenthesis() {
+		originalOperand = NewParenthesisOperand(originalOperand)
+	}
 	return NewSubtractOperand(newOperand, originalOperand), nil
 }
 
