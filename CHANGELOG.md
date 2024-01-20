@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.1] - 2024-01-20
+
 ### Fixed
 
 - Missed parenthesis for subtract operation that is applied to a sum or subtraction
