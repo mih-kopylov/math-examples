@@ -25,6 +25,7 @@ type ProfileParams struct {
 	MinBoundary                     int               `yaml:"minBoundary"`
 	MaxBoundary                     int               `yaml:"maxBoundary"`
 	OperandsCount                   int               `yaml:"operandsCount"`
+	Parenthesis                     bool              `yaml:"parenthesis"`
 	ShowCorrectAnswerAfter          CorrectAnswerMode `yaml:"showCorrectAnswerAfter"`
 	AvailableOperands               []string          `yaml:"availableOperands"`
 	AvailableMultiplicationOperands []string          `yaml:"availableMultiplicationOperands"`

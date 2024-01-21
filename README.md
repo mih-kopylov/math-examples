@@ -34,6 +34,7 @@ profiles:
     minBoundary: 0                   # Minimal value that is calculated on each iteration
     maxBoundary: 100                 # Maximum value that is calculated on each iteration 
     operandsCount: 2                 # Number of operands in each exercise
+    parenthesis: true                # Whether parenthesis are used or not
     showCorrectAnswerAfter: each     # Use 'each' to show a correct answer after each exercise or 'all' to show summary after all exercises
     availableOperands:               # Available operands values used in plus and minus generation
       - 1:100

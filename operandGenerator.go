@@ -13,6 +13,7 @@ var (
 	ErrUnableToGenerateOperand       = errorx.NewType(ErrGeneratorNamespace, "UnableToGenerateOperand")
 	ErrUnableToGenerateOperationType = errorx.NewType(ErrGeneratorNamespace, "UnableToGenerateOperationType")
 	ErrUnableToGenerateDirection     = errorx.NewType(ErrGeneratorNamespace, "UnableToGenerateDirection")
+	ErrParenthesisDisabled           = errorx.NewType(ErrGeneratorNamespace, "ParenthesisDisabled")
 )
 
 type Direction string
@@ -134,18 +135,21 @@ func (g *OperandGenerator) generateOperandBasedOn(
 	case PlusOperationType:
 		return g.generateSumOperand(direction, originalOperand)
 	case MinusOperationType:
-		return g.generateSubtractOperand(direction, originalOperand)
+		return g.generateSubtractOperand(params, direction, originalOperand)
 	case MultiplyOperationType:
-		return g.generateMultiplyOperand(originalOperand, direction)
+		return g.generateMultiplyOperand(params, originalOperand, direction)
 	case DivideOperationType:
-		return g.generateDivideOperand(originalOperand)
+		return g.generateDivideOperand(params, originalOperand)
 	default:
 		return nil, ErrUnsupportedOperationType.New("type: %v", operationType)
 	}
 }
 
-func (g *OperandGenerator) generateDivideOperand(originalOperand Operand) (Operand, error) {
+func (g *OperandGenerator) generateDivideOperand(params *ProfileParams, originalOperand Operand) (Operand, error) {
 	if originalOperand.NeedsParenthesis() {
+		if !params.Parenthesis {
+			return nil, ErrParenthesisDisabled.NewWithNoMessage()
+		}
 		originalOperand = NewParenthesisOperand(originalOperand)
 	}
 	var availableDivideOperands []int
@@ -171,11 +175,16 @@ func (g *OperandGenerator) generateDivideOperand(originalOperand Operand) (Opera
 	return NewDivideOperand(originalOperand, newOperand), nil
 }
 
-func (g *OperandGenerator) generateMultiplyOperand(originalOperand Operand, direction Direction) (Operand, error) {
+func (g *OperandGenerator) generateMultiplyOperand(
+	params *ProfileParams, originalOperand Operand, direction Direction,
+) (Operand, error) {
 	if !slices.Contains(g.availableMultiplicationOperands, originalOperand.Value()) {
 		return nil, ErrUnableToGenerateOperand.NewWithNoMessage()
 	}
 	if originalOperand.NeedsParenthesis() {
+		if !params.Parenthesis {
+			return nil, ErrParenthesisDisabled.NewWithNoMessage()
+		}
 		originalOperand = NewParenthesisOperand(originalOperand)
 	}
 	newOperand := NewSingleValueOperand(g.randomValue(g.availableMultiplicationOperands))
@@ -185,12 +194,17 @@ func (g *OperandGenerator) generateMultiplyOperand(originalOperand Operand, dire
 	return NewMultiplyOperand(newOperand, originalOperand), nil
 }
 
-func (g *OperandGenerator) generateSubtractOperand(direction Direction, originalOperand Operand) (Operand, error) {
+func (g *OperandGenerator) generateSubtractOperand(
+	params *ProfileParams, direction Direction, originalOperand Operand,
+) (Operand, error) {
 	newOperand := NewSingleValueOperand(g.randomValue(g.availableOperands))
 	if direction == RightDirection {
 		return NewSubtractOperand(originalOperand, newOperand), nil
 	}
 	if originalOperand.NeedsParenthesis() {
+		if !params.Parenthesis {
+			return nil, ErrParenthesisDisabled.NewWithNoMessage()
+		}
 		originalOperand = NewParenthesisOperand(originalOperand)
 	}
 	return NewSubtractOperand(newOperand, originalOperand), nil
