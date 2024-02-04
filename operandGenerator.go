@@ -63,7 +63,7 @@ func (g *OperandGenerator) GenerateExample(params *ProfileParams, distribution *
 		}
 
 		if tryNumber > 1000 {
-			return nil, ErrUnableToGenerateExample.New("Не удалось придумать пример с заданной конфигурацией. Проверьте конфигурацию.")
+			return nil, ErrUnableToGenerateExample.New("The configuration looks wrong")
 		}
 	}
 }

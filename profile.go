@@ -22,7 +22,7 @@ func ReadProfile(printer Printer) (*ProfileParams, error) {
 	flag.Parse()
 
 	if *profileName == "" {
-		return nil, ErrNoProfileName.New("Не передано имя профиля. Используйте -p аргумент")
+		return nil, ErrNoProfileName.New("Profile name is not pass. Use -p flag")
 	}
 
 	profile, exists := app.Profiles[*profileName]

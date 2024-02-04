@@ -59,7 +59,7 @@ func (p *RangeConverter) RangeToInt(stringRanges []string) ([]int, error) {
 
 			if minValue > maxValue {
 				return nil, ErrInvalidRange.New(
-					"Минимальное значение должно быть меньше максимального: %v", stringValue,
+					"Minimum value should be less than maximum: %v", stringValue,
 				)
 			}
 
@@ -67,7 +67,7 @@ func (p *RangeConverter) RangeToInt(stringRanges []string) ([]int, error) {
 				result = append(result, i)
 			}
 		} else {
-			return nil, ErrInvalidRange.New("Некорректный диапазон: %v", stringValue)
+			return nil, ErrInvalidRange.New("Provided: '%v'. Correct value looks like '1:99'", stringValue)
 		}
 	}
 
