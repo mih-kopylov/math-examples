@@ -8,8 +8,8 @@ import (
 )
 
 func TestRangeConverter_RangeToInt(t *testing.T) {
-	errInvalidRangeMinMax := "range.InvalidRange: Минимальное значение должно быть меньше максимального: %v"
-	errInvalidRange := "range.InvalidRange: Некорректный диапазон: %v"
+	errInvalidRangeMinMax := "range.InvalidRange: Minimum value should be less than maximum: %v"
+	errInvalidRange := "range.InvalidRange: Provided: '%v'. Correct value looks like '1:99'"
 	tests := []struct {
 		sourceRange   string
 		expected      []int

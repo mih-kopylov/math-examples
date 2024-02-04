@@ -174,7 +174,7 @@ func TestOperandGenerator_GenerateExample(t *testing.T) {
 				AvailableMultiplicationOperands: []string{"9"},
 				AvailableOperationTypes:         []OperationType{PlusOperationType},
 			}, distribution: NewDistribution[int](),
-			expectedErr: ErrUnableToGenerateExample.New("Не удалось придумать пример с заданной конфигурацией. Проверьте конфигурацию."),
+			expectedErr: ErrUnableToGenerateExample.New("The configuration looks wrong"),
 		},
 	}
 	for _, tt := range tests {
