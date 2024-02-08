@@ -6,7 +6,7 @@ require (
 	github.com/joomcode/errorx v1.1.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
-	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a
+	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3
 	gopkg.in/yaml.v3 v3.0.1
 )
 
