@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/joomcode/errorx v1.1.1
-	github.com/stretchr/testify v1.8.4
-	go.uber.org/zap v1.26.0
-	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
+	github.com/stretchr/testify v1.9.0
+	go.uber.org/zap v1.27.0
+	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
 	gopkg.in/yaml.v3 v3.0.1
 )
 
