@@ -2,10 +2,10 @@ package main
 
 import (
 	"math/rand"
+	"slices"
 	"time"
 
 	"github.com/joomcode/errorx"
-	"golang.org/x/exp/slices"
 )
 
 var (

@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
+	"maps"
 
 	"github.com/joomcode/errorx"
-	"golang.org/x/exp/maps"
 )
 
 var (

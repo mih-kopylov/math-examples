@@ -1,12 +1,11 @@
 module github.com/mih-kopylov/math-examples
 
-go 1.20
+go 1.23
 
 require (
 	github.com/joomcode/errorx v1.1.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/exp v0.0.0-20240318143956-a85f2c67cd81
 	gopkg.in/yaml.v3 v3.0.1
 )
 
