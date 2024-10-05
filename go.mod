@@ -1,6 +1,6 @@
 module github.com/mih-kopylov/math-examples
 
-go 1.20
+go 1.23
 
 require (
 	github.com/joomcode/errorx v1.1.1
