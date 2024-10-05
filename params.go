@@ -65,8 +65,8 @@ func ReadParams() (*AppParams, error) {
 						MultiplyOperationType,
 						DivideOperationType,
 					},
-					AvailableOperands:               []string{"1-100"},
-					AvailableMultiplicationOperands: []string{"1-9"},
+					AvailableOperands:               []string{"1:100"},
+					AvailableMultiplicationOperands: []string{"1:9"},
 				},
 			},
 		}
